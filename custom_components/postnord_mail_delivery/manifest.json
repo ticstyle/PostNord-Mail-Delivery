@@ -1,0 +1,10 @@
+{
+  "domain": "postnord_mail_delivery",
+  "name": "PostNord Mail Delivery",
+  "codeowners": ["@ticstyle"],
+  "config_flow": true,
+  "documentation": "https://github.com/ticstyle/postnord_mail_delivery",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/ticstyle/postnord_mail_delivery/issues",
+  "version": "1.0.0-beta"
+}
