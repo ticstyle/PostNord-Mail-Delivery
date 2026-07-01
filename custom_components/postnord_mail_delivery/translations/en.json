@@ -1,0 +1,17 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "PostNord Mail Delivery",
+        "description": "Enter your postal code to get the next scheduled mail delivery.",
+        "data": {
+          "postal_code": "Postal code"
+        }
+      }
+    },
+    "error": {
+      "invalid_postal_code": "Invalid postal code or error connecting to PostNord."
+    }
+  }
+}
+
