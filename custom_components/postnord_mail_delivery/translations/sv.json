@@ -1,0 +1,16 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "PostNord Mail Delivery",
+        "description": "Ange ditt postnummer för att hämta nästa schemalagda postutdelning.",
+        "data": {
+          "postal_code": "Postnummer"
+        }
+      }
+    },
+    "error": {
+      "invalid_postal_code": "Ogiltigt postnummer eller fel vid anrop till PostNord."
+    }
+  }
+}
