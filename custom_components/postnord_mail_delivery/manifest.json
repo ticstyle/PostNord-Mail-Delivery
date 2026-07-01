@@ -6,5 +6,5 @@
   "documentation": "https://github.com/ticstyle/postnord_mail_delivery",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/ticstyle/postnord_mail_delivery/issues",
-  "version": "1.0.0-beta"
+  "version": "1.0.0-rc.2"
 }
