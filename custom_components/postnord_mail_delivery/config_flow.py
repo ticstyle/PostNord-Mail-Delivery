@@ -1,10 +1,10 @@
 """Config flow for PostNord Mail Delivery."""
 
 import logging
-import aiohttp
 import voluptuous as vol
 
 from homeassistant import config_entries
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import CONF_POSTALCODE, DOMAIN
 
@@ -31,15 +31,13 @@ class PostNordMailDeliveryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         postalcode = user_input[CONF_POSTALCODE]
         url = f"https://portal.postnord.com/api/sendoutarrival/closest?postalCode={postalcode}"
+        session = async_get_clientsession(self.hass)
 
         try:
-            async with aiohttp.ClientSession(
-                timeout=aiohttp.ClientTimeout(total=5)
-            ) as session:
-                async with session.get(url) as resp:
-                    resp.raise_for_status()
-                    data = await resp.json()
-                    postal_city = data["city"].capitalize()
+            async with session.get(url, timeout=5) as resp:
+                resp.raise_for_status()
+                data = await resp.json()
+                postal_city = data["city"].capitalize()
         except Exception:
             return self.async_show_form(
                 step_id="user",
