@@ -12,5 +12,11 @@
     "error": {
       "invalid_postal_code": "Ogiltigt postnummer eller fel vid anrop till PostNord."
     }
+  },
+  "friendly_status": {
+    "today": "I dag",
+    "tomorrow": "I morgon",
+    "in_days": "Om {days} dagar",
+    "no_delivery": "Ingen utdelning planerad"
   }
 }
