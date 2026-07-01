@@ -2,9 +2,9 @@
 
 import logging
 from datetime import datetime
-import aiohttp
 
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import DOMAIN, UPDATE_INTERVAL
@@ -28,13 +28,12 @@ class PostNordUpdateCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self):
         """Fetch data from PostNord API."""
         url = f"https://portal.postnord.com/api/sendoutarrival/closest?postalCode={self.postal_code}"
+        session = async_get_clientsession(self.hass)
+        
         try:
-            async with aiohttp.ClientSession(
-                timeout=aiohttp.ClientTimeout(total=10)
-            ) as session:
-                async with session.get(url) as resp:
-                    resp.raise_for_status()
-                    data = await resp.json()
+            async with session.get(url, timeout=10) as resp:
+                resp.raise_for_status()
+                data = await resp.json()
         except Exception as err:
             raise UpdateFailed(
                 f"Error communicating with PostNord API: {err}"
@@ -84,3 +83,4 @@ class PostNordUpdateCoordinator(DataUpdateCoordinator):
             "postal_city": data.get("city", "").capitalize(),
             "last_update": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
+        
