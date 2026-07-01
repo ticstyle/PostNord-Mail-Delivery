@@ -12,5 +12,11 @@
     "error": {
       "invalid_postal_code": "Invalid postal code or error connecting to PostNord."
     }
+  },
+  "friendly_status": {
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "in_days": "In {days} days",
+    "no_delivery": "No delivery scheduled"
   }
 }
