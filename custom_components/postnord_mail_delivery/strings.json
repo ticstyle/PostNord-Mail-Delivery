@@ -3,15 +3,14 @@
     "step": {
       "user": {
         "title": "PostNord Mail Delivery",
-        "description": "Ange ditt postnummer för att hämta nästa postutdelning.",
+        "description": "Enter your postal code to get the next scheduled mail delivery.",
         "data": {
-          "postal_code": "Postnummer"
+          "postal_code": "Postal code"
         }
       }
     },
     "error": {
-      "invalid_postal_code": "Ogiltigt postnummer eller fel vid anrop till PostNord."
+      "invalid_postal_code": "Invalid postal code or error connecting to PostNord."
     }
   }
 }
-
