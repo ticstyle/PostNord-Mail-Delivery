@@ -37,7 +37,7 @@ class PostNordDeliverySensor(CoordinatorEntity, SensorEntity):
 
         self._attr_unique_id = f"{DOMAIN}_{self._postal_code}_sensor"
         self._attr_name = f"PostNord Delivery {self._postal_code}"
-        self._attr_icon = "mdi:email-fast-outline"
+        self._attr_icon = "mdi:mailbox-up-outline"
         self._attr_device_info = {
             ATTR_IDENTIFIERS: {(DOMAIN, DEVICE_NAME)},
             ATTR_NAME: DEVICE_NAME,
@@ -59,5 +59,5 @@ class PostNordDeliverySensor(CoordinatorEntity, SensorEntity):
             "postal_city": self.coordinator.data.get("postal_city"),
             "next_delivery": self.coordinator.data.get("next_delivery"),
             "postal_code": self._postal_code,
-            "logo": "https://logo.clearbit.com/postnord.se",
         }
+        
