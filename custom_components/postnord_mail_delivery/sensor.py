@@ -26,13 +26,11 @@ def _get_local_strings(dir_path: str, lang: str) -> dict:
     """
     file_path = os.path.join(dir_path, "translations", f"{lang}.json")
 
-    # Fallback for regional profiles (e.g., sv-SE -> sv)
     if not os.path.exists(file_path) and "-" in lang:
         file_path = os.path.join(
             dir_path, "translations", f"{lang.split('-')[0]}.json"
         )
 
-    # Ultimate fallback to base strings.json if language file doesn't exist
     if not os.path.exists(file_path):
         file_path = os.path.join(dir_path, "strings.json")
 
@@ -49,11 +47,9 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
     postal_code = config_entry.data[CONF_POSTALCODE]
 
-    # Hämta systemets språk asynkront under uppstarten
     lang = hass.config.language if hass else "en"
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
-    # Kör den blockerande filinläsningen i en säker bakgrundstråd (Executor)
     status_strings = await hass.async_add_executor_job(
         _get_local_strings, dir_path, lang
     )
@@ -72,15 +68,22 @@ class PostNordDeliverySensor(CoordinatorEntity, SensorEntity):
         self._postal_code = postal_code
         self._status_strings = status_strings
 
-        # Tvingar fram det exakta namnet (t.ex. sensor.postnord_mail_delivery_61792)
-        self.entity_id = f"sensor.{DOMAIN}_{self._postal_code}"
+        p_code = str(postal_code).replace(" ", "")
+        if len(p_code) == 5:
+            self._formatted_postal_code = f"{p_code[:3]} {p_code[3:]}"
+        else:
+            self._formatted_postal_code = p_code
 
+        self.entity_id = f"sensor.{DOMAIN}_{self._postal_code}"
         self._attr_unique_id = f"{DOMAIN}_{self._postal_code}_sensor"
-        self._attr_name = f"PostNord Delivery {self._postal_code}"
+
+        self._attr_has_entity_name = True
+        self._attr_name = f"Delivery for {self._postal_code}"
         self._attr_icon = "mdi:mailbox-up-outline"
+        
         self._attr_device_info = {
             ATTR_IDENTIFIERS: {(DOMAIN, DEVICE_NAME)},
-            ATTR_NAME: DEVICE_NAME,
+            ATTR_NAME: "PostNord",  
             ATTR_MANUFACTURER: DEVICE_AUTHOR,
             ATTR_MODEL: "PostNord Mail Delivery",
             "entry_type": DeviceEntryType.SERVICE,
@@ -96,7 +99,6 @@ class PostNordDeliverySensor(CoordinatorEntity, SensorEntity):
         """Return the state attributes."""
         state = self.coordinator.data.get("state")
 
-        # Safe dictionary getters with raw English fallback strings
         today = self._status_strings.get("today", "Today")
         tomorrow = self._status_strings.get("tomorrow", "Tomorrow")
         in_days_fmt = self._status_strings.get("in_days", "In {days} days")
@@ -104,7 +106,6 @@ class PostNordDeliverySensor(CoordinatorEntity, SensorEntity):
             "no_delivery", "No delivery scheduled"
         )
 
-        # Generate the friendly status string dynamically
         if isinstance(state, int):
             if state == 0:
                 friendly_status = today
@@ -121,10 +122,22 @@ class PostNordDeliverySensor(CoordinatorEntity, SensorEntity):
             else:
                 friendly_status = state
 
+        last_update = self.coordinator.data.get("last_update")
+        if hasattr(last_update, "strftime"):
+            last_update_formatted = last_update.strftime("%Y-%m-%d %H:%M:%S")
+        else:
+            last_update_formatted = str(last_update)
+
+        next_delivery = self.coordinator.data.get("next_delivery")
+        if hasattr(next_delivery, "strftime"):
+            next_delivery_formatted = next_delivery.strftime("%Y-%m-%d")
+        else:
+            next_delivery_formatted = str(next_delivery)
+
         return {
-            "last_update": self.coordinator.data.get("last_update"),
+            "last_update": last_update_formatted,
             "postal_city": self.coordinator.data.get("postal_city"),
-            "next_delivery": self.coordinator.data.get("next_delivery"),
-            "postal_code": self._postal_code,
+            "next_delivery": next_delivery_formatted,
+            "postal_code": self._formatted_postal_code,
             "friendly_status": friendly_status,
         }
