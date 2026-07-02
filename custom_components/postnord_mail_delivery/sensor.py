@@ -1,5 +1,6 @@
 """Sensor platform for PostNord Mail Delivery."""
 
+from datetime import date, datetime
 import json
 import logging
 import os
@@ -182,9 +183,18 @@ class PostNordDeliverySensor(CoordinatorEntity, SensorEntity):
 
         if self._sensor_type == "date":
             next_delivery = self.coordinator.data.get("next_delivery")
-            if hasattr(next_delivery, "strftime"):
-                return next_delivery.strftime("%Y-%m-%d")
-            return str(next_delivery)
+            if isinstance(next_delivery, datetime):
+                return next_delivery.date()
+            if isinstance(next_delivery, date):
+                return next_delivery
+            if isinstance(next_delivery, str):
+                try:
+                    return datetime.strptime(
+                        next_delivery.strip(), "%Y-%m-%d"
+                    ).date()
+                except ValueError:
+                    return None
+            return None
 
         if self._sensor_type == "city":
             return self.coordinator.data.get("postal_city")
