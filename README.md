@@ -11,14 +11,13 @@ An asynchronous Home Assistant custom integration to track your next scheduled m
 To add this integration, please add the custom repository `https://github.com/ticstyle/PostNord-Mail-Delivery/` to HACS in your Home Assistant setup.
 
 ## 🌐 Supported Languages / Språk
-The integration automatically detects your Home Assistant user profile settings and localizes all configurations and attributes dynamically:
-* 🇸🇪 **Svenska** (Fullt stöd för gränssnitt och attribut)
-* 🇬🇧 **English** (Full UI and attribute localization)
+The integration automatically handles translations natively under the hood. It exposes dedicated sensors for both Swedish and English text status outputs simultaneously, allowing you to force Swedish display texts even if your global Home Assistant profile language is set to English.
 
 ## ✨ Features
-* **Automation-Friendly State:** The primary sensor state returns a raw numeric integer representing the days remaining until your next delivery (`0` for today, `1` for tomorrow, etc.), making automation logic dead simple.
-* **On-the-fly Localization:** No hardcoded strings. Translations are handled natively via `strings.json` and `sv.json`.
-* **Rich Attributes:** Exposes detailed metadata directly into the sensor attributes for advanced card layouts.
+* **Device-Centric Architecture:** Instead of burying data inside attributes, the integration generates a clean Device element inside Home Assistant containing 5 dedicated, high-level sensors.
+* **Automation-Friendly Core:** The primary days sensor returns a raw numeric integer (`0` for today, `1` for tomorrow), making automation conditions dead simple.
+* **Dashboard Ready:** Native sensors mean you can add tracking elements directly to your Lovelace UI using standard entity cards—no advanced Jinja templates required.
+* **100% Async & Safe:** Fully optimized using Home Assistant executor threads to prevent blocking the main event loop during file operations.
 
 ## 🚀 Installation
 
@@ -32,25 +31,30 @@ Via [HACS](https://hacs.xyz/) or manually copy the `postnord_mail_delivery` fold
 
 Add the integration via the Home Assistant User Interface. You can set up multiple instances to track different postal codes simultaneously.
 
-## 📊 Sensor Attributes
-The main sensor exposes several useful `extra_state_attributes` which can be pulled into Markdown or custom cards:
+## 📊 Available Entities
+When configuring a postal code (e.g., `11122`), the integration automatically registers a device named **PostNord 111 22** containing the following 5 entities:
 
-| Attribute | Description | Example (EN) | Example (SV) |
+| Entity ID | Name in UI | State Example | Description |
 | :--- | :--- | :--- | :--- |
-| `friendly_status` | A localized, human-readable status phrase | `Tomorrow` | `I morgon` |
-| `next_delivery` | The confirmed date of the next delivery | `2026-07-03` | `2026-07-03` |
-| `postal_city` | The city mapped to your postal code | `Stockholm` | `Stockholm` |
-| `postal_code` | The monitored postal code | `11122` | `11122` |
-| `last_update` | Timestamp of the last API refresh | `2026-07-02 14:55` | `2026-07-02 14:55` |
+| `sensor.postnord_mail_delivery_11122` | Days until delivery | `1` | Raw days left until next delivery. Perfect for automations. |
+| `sensor.postnord_mail_delivery_11122_friendly_status_en` | Friendly Status (EN) | `Tomorrow` | English relative status phrase (`Today`, `Tomorrow`, `In X days`). |
+| `sensor.postnord_mail_delivery_11122_friendly_status_sv` | Friendly Status (SV) | `I morgon` | Swedish relative status phrase (`I dag`, `I morgon`, `Om X dagar`). |
+| `sensor.postnord_mail_delivery_11122_next_delivery` | Next Delivery | `2026-07-03` | Explicit date string formatted as `YYYY-MM-DD`. |
+| `sensor.postnord_mail_delivery_11122_postal_city` | Postal City | `Stockholm` | The verified city destination from the PostNord register. |
+
+### Entity Attributes
+Every single entity listed above also exposes the following common tracking metadata attributes:
+* `last_update`: Formatted timestamp (`YYYY-MM-DD HH:MM:SS`) of the last API check.
+* `postal_code`: Cleanly formatted tracking zone representation (e.g., `111 22`).
 
 ## 💡 Lovelace Dashboard Example
-You can use the built-in `friendly_status` attribute to build a clean Markdown card on your dashboard. Replace `11122` with your postal code:
+Because all data points are now first-class sensors, building a beautiful markdown summary layout is incredibly clean and no longer requires attribute lookups. Replace `11122` with your targeted postal code:
 
 ```yaml
 type: markdown
 title: "PostNord Postutdelning"
 content: >
-  Nästa postutdelning är: **{{ state_attr('sensor.postnord_mail_delivery_11122', 'friendly_status') }}**
+  Nästa postutdelning är: **{{ states('sensor.postnord_mail_delivery_11122_friendly_status_sv') }}**
   
-  Exakt datum: {{ state_attr('sensor.postnord_mail_delivery_11122', 'next_delivery') }}  
-  Ort: {{ state_attr('sensor.postnord_mail_delivery_11122', 'postal_city') }}
+  Exakt datum: {{ states('sensor.postnord_mail_delivery_11122_next_delivery') }}  
+  Ort: {{ states('sensor.postnord_mail_delivery_11122_postal_city') }}
