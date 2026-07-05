@@ -14,8 +14,8 @@
     }
   },
   "friendly_status": {
-    "today": "I dag",
-    "tomorrow": "I morgon",
+    "today": "Idag",
+    "tomorrow": "Imorgon",
     "in_days": "Om {days} dagar",
     "no_delivery": "Ingen utdelning planerad"
   }
