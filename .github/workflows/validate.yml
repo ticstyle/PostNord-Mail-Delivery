@@ -7,7 +7,7 @@ on:
       - dev
   pull_request:
   schedule:
-    - cron: "0 0 * * *" # Körs automatiskt varje natt för att upptäcka om HA Core ändrat något
+    - cron: "0 0 * * *" 
 
 jobs:
   hassfest:
@@ -31,3 +31,39 @@ jobs:
         uses: hacs/action@main
         with:
           category: integration
+          
+  ruff:
+    name: Code Formatting & Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Ruff Check
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: "check custom_components/day_modes"
+
+      - name: Run Ruff Format
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: "format --check custom_components/day_modes"
+
+  mypy:
+    name: Type Checking
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12" 
+
+      - name: Install Mypy & Dependencies
+        run: |
+          pip install mypy homeassistant
+
+      - name: Run Mypy
+        run: mypy custom_components/day_modes
