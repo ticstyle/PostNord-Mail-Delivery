@@ -10,19 +10,14 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    ATTR_IDENTIFIERS,
-    ATTR_MANUFACTURER,
-    ATTR_MODEL,
-    UnitOfTime,
-)
+from homeassistant.const import UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import CONF_POSTALCODE, DEVICE_AUTHOR, DOMAIN
-from .coordinator import PostNordDataUpdateCoordinator
+from .coordinator import PostNordUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,7 +43,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the sensor platform with multiple entities."""
-    coordinator: PostNordDataUpdateCoordinator = hass.data[DOMAIN][
+    coordinator: PostNordUpdateCoordinator = hass.data[DOMAIN][
         config_entry.entry_id
     ]
     postal_code: str = config_entry.data[CONF_POSTALCODE]
@@ -64,7 +59,7 @@ async def async_setup_entry(
 
 
 class PostNordDeliverySensor(
-    CoordinatorEntity[PostNordDataUpdateCoordinator], SensorEntity
+    CoordinatorEntity[PostNordUpdateCoordinator], SensorEntity
 ):
     """Representation of a versatile PostNord Delivery Sensor."""
 
@@ -72,7 +67,7 @@ class PostNordDeliverySensor(
 
     def __init__(
         self,
-        coordinator: PostNordDataUpdateCoordinator,
+        coordinator: PostNordUpdateCoordinator,
         postal_code: str,
         sensor_type: str,
     ) -> None:
