@@ -29,8 +29,8 @@ STATUS_STRINGS: dict[str, dict[str, str]] = {
         "no_delivery": "No delivery scheduled",
     },
     "sv": {
-        "today": "I dag",
-        "tomorrow": "I morgon",
+        "today": "Idag",
+        "tomorrow": "Imorgon",
         "in_days": "Om {days} dagar",
         "no_delivery": "Ingen utdelning planerad",
     },
