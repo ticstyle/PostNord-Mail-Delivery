@@ -29,8 +29,8 @@ STATUS_STRINGS: dict[str, dict[str, str]] = {
         "no_delivery": "No delivery scheduled",
     },
     "sv": {
-        "today": "Idag",
-        "tomorrow": "Imorgon",
+        "today": "I dag",
+        "tomorrow": "I morgon",
         "in_days": "Om {days} dagar",
         "no_delivery": "Ingen utdelning planerad",
     },
@@ -186,10 +186,14 @@ class PostNordDeliverySensor(
 
         last_update = self.coordinator.data.get("last_update")
 
-        if hasattr(last_update, "strftime"):
-            last_update_formatted = last_update.strftime("%Y-%m-%d %H:%M:%S")
-        else:
+        if isinstance(last_update, (datetime, date)):
+            last_update_formatted: str | None = last_update.strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+        elif last_update is not None:
             last_update_formatted = str(last_update)
+        else:
+            last_update_formatted = None
 
         return {
             "last_update": last_update_formatted,
