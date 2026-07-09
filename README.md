@@ -4,7 +4,7 @@
 ![](https://img.shields.io/badge/Home%20Assistant-Custom%20Integration-blue?style=for-the-badge&logo=home-assistant)
 ![](https://img.shields.io/github/license/ticstyle/PostNord-Mail-Delivery?style=for-the-badge)
 ![](https://img.shields.io/github/downloads/ticstyle/PostNord-Mail-Delivery/total?style=for-the-badge&color=green)
-![](https://img.shields.io/github/issues/ticstyle/PostNord-Mail-Delivery?style=for-the-badge&color=orange)
+![](https://img.shields.io/github/issues/ticstyle/PostNord-Mail-Delivery?style=for-the-badge&color=orange)[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 An asynchronous Home Assistant custom integration to track your next scheduled mail delivery from PostNord in Sweden.
 
