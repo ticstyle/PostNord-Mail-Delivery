@@ -43,9 +43,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the sensor platform with multiple entities."""
-    coordinator: PostNordUpdateCoordinator = hass.data[DOMAIN][
-        config_entry.entry_id
-    ]
+    coordinator: PostNordUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
     postal_code: str = config_entry.data[CONF_POSTALCODE]
 
     sensor_types = ["days", "friendly_en", "friendly_sv", "date", "city"]
@@ -167,9 +165,7 @@ class PostNordDeliverySensor(
                 return next_delivery
             if isinstance(next_delivery, str):
                 try:
-                    return datetime.strptime(
-                        next_delivery.strip(), "%Y-%m-%d"
-                    ).date()
+                    return datetime.strptime(next_delivery.strip(), "%Y-%m-%d").date()
                 except ValueError:
                     return None
             return None
