@@ -42,12 +42,12 @@ jobs:
       - name: Run Ruff Check
         uses: astral-sh/ruff-action@v3
         with:
-          args: "check custom_components/day_modes"
+          args: "check custom_components/postnord_mail_delivery"
 
       - name: Run Ruff Format
         uses: astral-sh/ruff-action@v3
         with:
-          args: "format --check custom_components/day_modes"
+          args: "format --check custom_components/postnord_mail_delivery"
 
   mypy:
     name: Type Checking
@@ -66,4 +66,4 @@ jobs:
           pip install mypy homeassistant
 
       - name: Run Mypy
-        run: mypy custom_components/day_modes
+        run: mypy custom_components/postnord_mail_delivery
