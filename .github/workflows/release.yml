@@ -35,26 +35,12 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create ZIP archive for manual installation
-        if: steps.check_tag.outputs.exists == 'false'
-        run: |
-          cd custom_components
-          zip -r ../postnord_mail_delivery.zip postnord_mail_delivery
-
       - name: Build GitHub Release
         if: steps.check_tag.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.get_version.outputs.VERSION }}
           name: v${{ steps.get_version.outputs.VERSION }}
-          body: |
-            ## PostNord Mail Delivery v${{ steps.get_version.outputs.VERSION }}
-            
-            Automated release triggered by version bump in `main`.
-            
-            ### 🚀 Installation
-            * **HACS:** Find and update the integration directly within Home Assistant.
-            * **Manual:** Download the attached `postnord_mail_delivery.zip` asset and extract its contents into your `custom_components/` directory.
+          generate_release_notes: true
           draft: false
           prerelease: false
-          files: postnord_mail_delivery.zip
