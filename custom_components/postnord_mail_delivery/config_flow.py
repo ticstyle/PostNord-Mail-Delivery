@@ -37,8 +37,16 @@ class PostNordMailDeliveryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             async with session.get(url, timeout=5) as resp:
                 resp.raise_for_status()
                 data = await resp.json()
+                # Validate that data is a dictionary before accessing keys
+                if not isinstance(data, dict) or "city" not in data:
+                    return self.async_show_form(
+                        step_id="user",
+                        data_schema=data_schema,
+                        errors={"base": "invalid_postal_code"},
+                    )
                 postal_city = data["city"].capitalize()
-        except Exception:
+        except Exception as err:
+            _LOGGER.error("Error validating postal code: %s", err)
             return self.async_show_form(
                 step_id="user",
                 data_schema=data_schema,
