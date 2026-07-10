@@ -43,19 +43,28 @@ jobs:
   ruff:
     name: Code Formatting & Linting
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Gives GitHub permission to push formatting fixes back
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref || github.ref }} # Targets the active PR branch or current branch
 
       - name: Run Ruff Check
         uses: astral-sh/ruff-action@v3
         with:
-          args: "check custom_components/postnord_mail_delivery"
+          args: "check --fix custom_components/postnord_mail_delivery" # Added --fix to auto-resolve basic lint errors
 
       - name: Run Ruff Format
         uses: astral-sh/ruff-action@v3
         with:
-          args: "format --check custom_components/postnord_mail_delivery"
+          args: "format custom_components/postnord_mail_delivery" # Removed --check so files are physically reformatted
+
+      - name: Commit automatic formatting changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style: auto-format code with Ruff"
 
   mypy:
     name: Type Checking
