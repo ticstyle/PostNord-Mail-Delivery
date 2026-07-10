@@ -29,15 +29,13 @@ class PostNordUpdateCoordinator(DataUpdateCoordinator):
         """Fetch data from PostNord API."""
         url = f"https://portal.postnord.com/api/sendoutarrival/closest?postalCode={self.postal_code}"
         session = async_get_clientsession(self.hass)
-        
+
         try:
             async with session.get(url, timeout=10) as resp:
                 resp.raise_for_status()
                 data = await resp.json()
         except Exception as err:
-            raise UpdateFailed(
-                f"Error communicating with PostNord API: {err}"
-            ) from err
+            raise UpdateFailed(f"Error communicating with PostNord API: {err}") from err
 
         # Säker och robust datumparsning
         delivery_text = str(data.get("delivery", "")).strip()
@@ -83,4 +81,3 @@ class PostNordUpdateCoordinator(DataUpdateCoordinator):
             "postal_city": data.get("city", "").capitalize(),
             "last_update": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
-        

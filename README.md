@@ -2,6 +2,10 @@
 
 ![](https://img.shields.io/github/v/release/ticstyle/PostNord-Mail-Delivery?style=for-the-badge&color=blue)
 ![](https://img.shields.io/badge/Home%20Assistant-Custom%20Integration-blue?style=for-the-badge&logo=home-assistant)
+[![Hassfest](https://img.shields.io/github/actions/workflow/status/ticstyle/PostNord-Mail-Delivery/validate.yml?branch=main&job=hassfest&label=Hassfest&style=for-the-badge)](https://github.com/ticstyle/PostNord-Mail-Delivery/actions/workflows/validate.yml)
+[![HACS Validation](https://img.shields.io/github/actions/workflow/status/ticstyle/PostNord-Mail-Delivery/validate.yml?branch=main&job=hacs&label=HACS&style=for-the-badge)](https://github.com/ticstyle/PostNord-Mail-Delivery/actions/workflows/validate.yml)
+[![Ruff](https://img.shields.io/github/actions/workflow/status/ticstyle/PostNord-Mail-Delivery/validate.yml?branch=main&job=ruff&label=Ruff&style=for-the-badge)](https://github.com/ticstyle/PostNord-Mail-Delivery/actions/workflows/validate.yml)
+[![Mypy](https://img.shields.io/github/actions/workflow/status/ticstyle/PostNord-Mail-Delivery/validate.yml?branch=main&job=mypy&label=Mypy&style=for-the-badge)](https://github.com/ticstyle/PostNord-Mail-Delivery/actions/workflows/validate.yml)
 ![](https://img.shields.io/github/license/ticstyle/PostNord-Mail-Delivery?style=for-the-badge)
 ![](https://img.shields.io/github/downloads/ticstyle/PostNord-Mail-Delivery/total?style=for-the-badge&color=green)
 ![](https://img.shields.io/github/issues/ticstyle/PostNord-Mail-Delivery?style=for-the-badge&color=orange)[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)

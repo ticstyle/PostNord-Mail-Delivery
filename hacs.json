@@ -1,6 +1,4 @@
 {
   "name": "PostNord Mail Delivery",
-  "type": "integration",
-  "render_readme": true,
   "country": ["SE"]
 }
