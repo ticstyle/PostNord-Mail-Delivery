@@ -7,7 +7,7 @@
 [![Ruff](https://img.shields.io/github/actions/workflow/status/ticstyle/PostNord-Mail-Delivery/validate.yml?branch=main&job=ruff&label=Ruff&style=for-the-badge)](https://github.com/ticstyle/PostNord-Mail-Delivery/actions/workflows/validate.yml)
 [![Mypy](https://img.shields.io/github/actions/workflow/status/ticstyle/PostNord-Mail-Delivery/validate.yml?branch=main&job=mypy&label=Mypy&style=for-the-badge)](https://github.com/ticstyle/PostNord-Mail-Delivery/actions/workflows/validate.yml)
 ![](https://img.shields.io/github/license/ticstyle/PostNord-Mail-Delivery?style=for-the-badge)
-![](https://img.shields.io/github/downloads/ticstyle/PostNord-Mail-Delivery/total?style=for-the-badge&color=green)
+![](https://img.shields.io/badge/dynamic/json?style=for-the-badge&color=41BDF5&logo=home-assistant&label=installs&url=https%3A%2F%2Fanalytics.home-assistant.io%2Fcustom_integrations.json&query=%24.postnord_mail_delivery.total)
 ![](https://img.shields.io/github/issues/ticstyle/PostNord-Mail-Delivery?style=for-the-badge&color=orange)
 
 An asynchronous Home Assistant custom integration to track your next scheduled mail delivery from PostNord in Sweden.
