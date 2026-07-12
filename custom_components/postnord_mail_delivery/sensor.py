@@ -43,9 +43,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the sensor platform with multiple entities."""
-    coordinator: PostNordUpdateCoordinator = hass.data[DOMAIN][
-        config_entry.entry_id
-    ]
+    coordinator: PostNordUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
     postal_code: str = config_entry.data[CONF_POSTALCODE]
 
     sensor_types = ["days", "friendly_en", "friendly_sv", "date", "city"]
@@ -96,16 +94,12 @@ class PostNordDeliverySensor(
             self._attr_native_unit_of_measurement = UnitOfTime.DAYS
         elif self._sensor_type == "friendly_en":
             self.entity_id = f"sensor.{DOMAIN}_{cleaned_code}_friendly_status_en"
-            self._attr_unique_id = (
-                f"{DOMAIN}_{cleaned_code}_friendly_status_en"
-            )
+            self._attr_unique_id = f"{DOMAIN}_{cleaned_code}_friendly_status_en"
             self._attr_name = "Friendly Status (EN)"
             self._attr_icon = "mdi:chat-processing-outline"
         elif self._sensor_type == "friendly_sv":
             self.entity_id = f"sensor.{DOMAIN}_{cleaned_code}_friendly_status_sv"
-            self._attr_unique_id = (
-                f"{DOMAIN}_{cleaned_code}_friendly_status_sv"
-            )
+            self._attr_unique_id = f"{DOMAIN}_{cleaned_code}_friendly_status_sv"
             self._attr_name = "Friendly Status (SV)"
             self._attr_icon = "mdi:chat-processing-outline"
         elif self._sensor_type == "date":
@@ -175,9 +169,7 @@ class PostNordDeliverySensor(
                 return next_delivery
             if isinstance(next_delivery, str):
                 try:
-                    return datetime.strptime(
-                        next_delivery.strip(), "%Y-%m-%d"
-                    ).date()
+                    return datetime.strptime(next_delivery.strip(), "%Y-%m-%d").date()
                 except ValueError:
                     return None
             return None
