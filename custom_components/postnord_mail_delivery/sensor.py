@@ -43,7 +43,9 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the sensor platform with multiple entities."""
-    coordinator: PostNordUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
+    coordinator: PostNordUpdateCoordinator = hass.data[DOMAIN][
+        config_entry.entry_id
+    ]
     postal_code: str = config_entry.data[CONF_POSTALCODE]
 
     sensor_types = ["days", "friendly_en", "friendly_sv", "date", "city"]
@@ -71,48 +73,56 @@ class PostNordDeliverySensor(
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
-        self._postal_code = str(postal_code)
+
+        # Normalize the postal code by stripping spaces for strict ID matching
+        cleaned_code = str(postal_code).replace(" ", "")
+        self._postal_code = cleaned_code
         self._sensor_type = sensor_type
 
-        # Format the postal code cleanly (e.g. 617 92)
-        p_code = self._postal_code.replace(" ", "")
+        # Format postal code for UI display (e.g. 617 92)
         self._formatted_postal_code = (
-            f"{p_code[:3]} {p_code[3:]}" if len(p_code) == 5 else p_code
+            f"{cleaned_code[:3]} {cleaned_code[3:]}"
+            if len(cleaned_code) == 5
+            else cleaned_code
         )
 
-        # Set entity properties based on sensor type
+        # Set entity properties using the normalized postal code
         if self._sensor_type == "days":
-            self.entity_id = f"sensor.{DOMAIN}_{self._postal_code}"
-            self._attr_unique_id = f"{DOMAIN}_{self._postal_code}_sensor"
+            self.entity_id = f"sensor.{DOMAIN}_{cleaned_code}"
+            self._attr_unique_id = f"{DOMAIN}_{cleaned_code}_sensor"
             self._attr_name = "Days until delivery"
             self._attr_icon = "mdi:mailbox-up-outline"
             self._attr_state_class = SensorStateClass.MEASUREMENT
             self._attr_native_unit_of_measurement = UnitOfTime.DAYS
         elif self._sensor_type == "friendly_en":
-            self.entity_id = f"sensor.{DOMAIN}_{self._postal_code}_friendly_status_en"
-            self._attr_unique_id = f"{DOMAIN}_{self._postal_code}_friendly_status_en"
+            self.entity_id = f"sensor.{DOMAIN}_{cleaned_code}_friendly_status_en"
+            self._attr_unique_id = (
+                f"{DOMAIN}_{cleaned_code}_friendly_status_en"
+            )
             self._attr_name = "Friendly Status (EN)"
             self._attr_icon = "mdi:chat-processing-outline"
         elif self._sensor_type == "friendly_sv":
-            self.entity_id = f"sensor.{DOMAIN}_{self._postal_code}_friendly_status_sv"
-            self._attr_unique_id = f"{DOMAIN}_{self._postal_code}_friendly_status_sv"
+            self.entity_id = f"sensor.{DOMAIN}_{cleaned_code}_friendly_status_sv"
+            self._attr_unique_id = (
+                f"{DOMAIN}_{cleaned_code}_friendly_status_sv"
+            )
             self._attr_name = "Friendly Status (SV)"
             self._attr_icon = "mdi:chat-processing-outline"
         elif self._sensor_type == "date":
-            self.entity_id = f"sensor.{DOMAIN}_{self._postal_code}_next_delivery"
-            self._attr_unique_id = f"{DOMAIN}_{self._postal_code}_next_delivery"
+            self.entity_id = f"sensor.{DOMAIN}_{cleaned_code}_next_delivery"
+            self._attr_unique_id = f"{DOMAIN}_{cleaned_code}_next_delivery"
             self._attr_name = "Next Delivery"
             self._attr_icon = "mdi:calendar-clock"
             self._attr_device_class = SensorDeviceClass.DATE
         elif self._sensor_type == "city":
-            self.entity_id = f"sensor.{DOMAIN}_{self._postal_code}_postal_city"
-            self._attr_unique_id = f"{DOMAIN}_{self._postal_code}_postal_city"
+            self.entity_id = f"sensor.{DOMAIN}_{cleaned_code}_postal_city"
+            self._attr_unique_id = f"{DOMAIN}_{cleaned_code}_postal_city"
             self._attr_name = "Postal City"
             self._attr_icon = "mdi:map-marker-outline"
 
-        # Attach device info
+        # Attach device info with static identifiers
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, self._postal_code)},
+            identifiers={(DOMAIN, cleaned_code)},
             name=f"PostNord {self._formatted_postal_code}",
             manufacturer=DEVICE_AUTHOR,
             model="PostNord Mail Delivery",
@@ -165,7 +175,9 @@ class PostNordDeliverySensor(
                 return next_delivery
             if isinstance(next_delivery, str):
                 try:
-                    return datetime.strptime(next_delivery.strip(), "%Y-%m-%d").date()
+                    return datetime.strptime(
+                        next_delivery.strip(), "%Y-%m-%d"
+                    ).date()
                 except ValueError:
                     return None
             return None
