@@ -33,4 +33,3 @@ async def async_get_config_entry_diagnostics(
         "config_entry": config_entry_data,
         "coordinator_data": redacted_coordinator_data,
     }
-  
