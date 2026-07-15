@@ -4,15 +4,13 @@ on:
   push:
     branches:
       - main
-      - dev
   pull_request:
     branches:
       - main
       - dev
   schedule:
     - cron: "0 0 * * *"
-
-# Cancel in-progress runs when pushing new commits to the same PR/branch
+    
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -44,22 +42,22 @@ jobs:
     name: Code Formatting & Linting
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Gives GitHub permission to push formatting fixes back
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.head_ref || github.ref }} # Targets the active PR branch or current branch
+          ref: ${{ github.head_ref || github.ref }}
 
       - name: Run Ruff Check
         uses: astral-sh/ruff-action@v3
         with:
-          args: "check --fix custom_components/postnord_mail_delivery" # Added --fix to auto-resolve basic lint errors
+          args: "check --fix custom_components/postnord_mail_delivery"
 
       - name: Run Ruff Format
         uses: astral-sh/ruff-action@v3
         with:
-          args: "format custom_components/postnord_mail_delivery" # Removed --check so files are physically reformatted
+          args: "format custom_components/postnord_mail_delivery"
 
       - name: Commit automatic formatting changes
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -76,11 +74,20 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.14"
+          cache: "pip"
+
+      - name: Cache Mypy internal analysis
+        uses: actions/cache@v4
+        with:
+          path: .mypy_cache
+          key: ${{ runner.os }}-mypy-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-mypy-
 
       - name: Install Mypy & Dependencies
         run: |
-          pip install mypy homeassistant
+          pip install -r requirements.txt
 
       - name: Run Mypy
         run: mypy custom_components/postnord_mail_delivery
