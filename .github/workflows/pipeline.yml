@@ -1,0 +1,180 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+  schedule:
+    - cron: "0 0 * * *"  # Runs nightly check
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  # =======================================================
+  # JOB 1: Sync Translations & Code Formatting (Linter)
+  # =======================================================
+  sync_and_format:
+    name: Sync Translations & Format Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.MY_WORKFLOW_SECRET }}  # Uses PAT to allow recursive test triggers
+          ref: ${{ github.head_ref || github.ref }}
+          fetch-depth: 0
+
+      - name: Copy strings.json to translations/en.json
+        run: |
+          cp custom_components/postnord_mail_delivery/strings.json custom_components/postnord_mail_delivery/translations/en.json
+
+      - name: Run Ruff Check
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: "check --fix custom_components/postnord_mail_delivery"
+
+      - name: Run Ruff Format
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: "format custom_components/postnord_mail_delivery"
+
+      - name: Commit & Push changes if needed
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: sync translations and auto-format with Ruff"
+          file_pattern: "custom_components/postnord_mail_delivery/translations/en.json custom_components/postnord_mail_delivery/**"
+
+  # ==========================================
+  # JOB 2: Parallel Validation Check Suites
+  # ==========================================
+  hassfest:
+    name: Run Hassfest
+    needs: sync_and_format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+
+      - name: Hassfest validation
+        uses: home-assistant/actions/hassfest@master
+
+  hacs:
+    name: Run HACS Check
+    needs: sync_and_format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+
+      - name: HACS validation
+        uses: hacs/action@main
+        with:
+          category: integration
+
+  mypy:
+    name: Type Checking
+    needs: sync_and_format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+          cache: "pip"
+
+      - name: Cache Mypy internal analysis
+        uses: actions/cache@v5
+        with:
+          path: .mypy_cache
+          key: ${{ runner.os }}-mypy-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-mypy-
+
+      - name: Install Mypy & Dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Mypy
+        run: mypy custom_components/postnord_mail_delivery
+
+  # ==========================================
+  # JOB 3: Autopublish GitHub Releases
+  # ==========================================
+  release:
+    name: Create GitHub Release
+    needs: [hassfest, hacs, mypy]
+    # Safety Gate: Only allow releases to run on push events to main or dev branches
+    if: github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'dev')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from manifest.json
+        id: get_version
+        run: |
+          VERSION=$(jq -r '.version' custom_components/postnord_mail_delivery/manifest.json)
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Detected version: v$VERSION"
+          
+          # Match alpha, beta, or rc tags within the manifest string
+          if [[ "$VERSION" =~ alpha|beta|rc ]]; then
+            echo "IS_PRERELEASE=true" >> $GITHUB_OUTPUT
+            echo "Pre-release variation detected. Flagging build."
+          else
+            echo "IS_PRERELEASE=false" >> $GITHUB_OUTPUT
+            echo "Production-stable variation detected."
+          fi
+          
+          # Safety Gate: Only allow pre-releases when on the dev branch
+          BRANCH="${{ github.ref_name }}"
+          if [[ "$BRANCH" == "dev" && ! "$VERSION" =~ alpha|beta|rc ]]; then
+            echo "SHOULD_RELEASE=false" >> $GITHUB_OUTPUT
+            echo "Stable version found on dev branch. Skipping release."
+          else
+            echo "SHOULD_RELEASE=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check if Git Tag already exists
+        id: check_tag
+        if: steps.get_version.outputs.SHOULD_RELEASE == 'true'
+        run: |
+          if git rev-parse "v${{ steps.get_version.outputs.VERSION }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Tag v${{ steps.get_version.outputs.VERSION }} already exists. Skipping release."
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build GitHub Release
+        if: steps.get_version.outputs.SHOULD_RELEASE == 'true' && steps.check_tag.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: v${{ steps.get_version.outputs.VERSION }}
+          name: v${{ steps.get_version.outputs.VERSION }}
+          target_commitish: ${{ github.sha }}  # Pin the tag/release to the exact commit SHA that triggered this run
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ steps.get_version.outputs.IS_PRERELEASE == 'true' }}
+          
