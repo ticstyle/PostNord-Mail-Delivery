@@ -102,7 +102,7 @@ jobs:
           cache: "pip"
 
       - name: Cache Mypy internal analysis
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: .mypy_cache
           key: ${{ runner.os }}-mypy-${{ hashFiles('requirements.txt') }}
