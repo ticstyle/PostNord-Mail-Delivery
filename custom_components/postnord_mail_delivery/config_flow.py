@@ -1,6 +1,9 @@
 """Config flow for PostNord Mail Delivery."""
 
+import asyncio
 import logging
+
+import aiohttp
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -45,7 +48,7 @@ class PostNordMailDeliveryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         errors={"base": "invalid_postal_code"},
                     )
                 postal_city = data["city"].capitalize()
-        except Exception as err:
+        except (aiohttp.ClientError, asyncio.TimeoutError, ValueError) as err:
             _LOGGER.error("Error validating postal code: %s", err)
             return self.async_show_form(
                 step_id="user",
