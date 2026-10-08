@@ -1,6 +1,6 @@
 """Sensor platform for PostNord Mail Delivery."""
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 import logging
 from typing import Any
 
@@ -169,7 +169,9 @@ class PostNordDeliverySensor(
                 return next_delivery
             if isinstance(next_delivery, str):
                 try:
-                    return datetime.strptime(next_delivery.strip(), "%Y-%m-%d").date()
+                    return datetime.strptime(next_delivery.strip(), "%Y-%m-%d").replace(
+                        tzinfo=timezone.utc
+                    ).date()
                 except ValueError:
                     return None
             return None
