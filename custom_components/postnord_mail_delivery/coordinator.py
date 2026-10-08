@@ -68,7 +68,7 @@ class PostNordUpdateCoordinator(DataUpdateCoordinator):
                     tzinfo=timezone.utc
                 )
                 num_days = (next_date - datetime.now(timezone.utc)).days + 1
-                state_value = 0 if num_days < 0 else num_days
+                state_value = max(num_days, 0)
             except ValueError:
                 state_value = delivery_text
         else:
