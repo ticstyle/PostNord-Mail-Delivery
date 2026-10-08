@@ -1,7 +1,7 @@
 """DataUpdateCoordinator for PostNord Mail Delivery."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -64,9 +64,11 @@ class PostNordUpdateCoordinator(DataUpdateCoordinator):
             formatted_date = f"{year}-{month}-{day}"
 
             try:
-                next_date = datetime.strptime(formatted_date, "%Y-%m-%d")
-                num_days = (next_date - datetime.now()).days + 1
-                state_value = 0 if num_days < 0 else num_days
+                next_date = datetime.strptime(formatted_date, "%Y-%m-%d").replace(
+                    tzinfo=timezone.utc
+                )
+                num_days = (next_date - datetime.now(timezone.utc)).days + 1
+                state_value = max(num_days, 0)
             except ValueError:
                 state_value = delivery_text
         else:
@@ -79,5 +81,5 @@ class PostNordUpdateCoordinator(DataUpdateCoordinator):
             "state": state_value,
             "next_delivery": formatted_date,
             "postal_city": data.get("city", "").capitalize(),
-            "last_update": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "last_update": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
         }

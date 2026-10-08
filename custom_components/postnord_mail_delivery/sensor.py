@@ -1,7 +1,7 @@
 """Sensor platform for PostNord Mail Delivery."""
 
-from datetime import date, datetime
 import logging
+from datetime import date, datetime, timezone
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -169,7 +169,11 @@ class PostNordDeliverySensor(
                 return next_delivery
             if isinstance(next_delivery, str):
                 try:
-                    return datetime.strptime(next_delivery.strip(), "%Y-%m-%d").date()
+                    return (
+                        datetime.strptime(next_delivery.strip(), "%Y-%m-%d")
+                        .replace(tzinfo=timezone.utc)
+                        .date()
+                    )
                 except ValueError:
                     return None
             return None
